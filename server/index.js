@@ -130,13 +130,11 @@ io.on('connection', (socket) => {
     //handles the incoming messages of a datachannel.
     
     // args:
-    //@e(object): various keys but data.action is responsible what happend to the data send by the client.
+    //@e(object): This object can have various keys but data.action is responsible what happend to the data.
 
     const data = JSON.parse(e.data)
    
     if (data.action === "updateChat") {
-
-    //grap the membersarray from the creator and send the dataOfChat object to them. Then update den Chat on the server
       
       const IndexOfCreator = Users.findIndex(user => user.email === data.emailOfCreator)
       const indexOfTargetRoom = Users[IndexOfCreator].createdRooms.findIndex(room => room.roomId === data.target)
@@ -253,7 +251,7 @@ io.on('connection', (socket) => {
         return
       }
 
-      //create a new room with the information of the sender and target
+      //creates a new room with the information of the sender and target
 
       Users[indexOfSender].createdRooms = [
         ...Users[indexOfSender].createdRooms, {
@@ -283,7 +281,7 @@ io.on('connection', (socket) => {
         }
       ]
 
-      //update the rooms of the sender
+      //updates the rooms of the sender
 
       const dataOfRoom = {
         roomId: data.roomId,
@@ -297,7 +295,7 @@ io.on('connection', (socket) => {
 
       const IndexOfRoom = Users[indexOfSender].createdRooms.findIndex(user => user.roomId === data.roomId)
       
-      //update the rooms of the target so that he gets the messages after his next login  
+      //updates the rooms of the target so that he gets the messages after his next login  
 
       if (Users[indexOfSender] != Users[indexOfTarget]) { 
         Users[indexOfTarget].rooms = [
@@ -349,7 +347,7 @@ io.on('connection', (socket) => {
 
       let updatedRooms = []  //this array contains the rooms which the user already joined
 
-    // update the data in the createdRooms.members Array
+    // update the data in the createdRooms.members array
 
       Users[indexOfSender].rooms.forEach(room => {
         const indexOfCreator = Users.findIndex(creator => creator.email == room.emailOfCreator) 
@@ -388,8 +386,8 @@ io.on('connection', (socket) => {
 
   socket.on('createPeerForReceivingStreams', async (data) => {
 
-    // creating the remote part of the webRtc connection for 
-    // receiver of streams. Find the creator of the videconference 
+    // creating the remote part of the webRtc connection for receiver of streams.
+    //  Find the creator of the videconference 
     // and add the stream to the peer 
 
     const peer = new webrtc.RTCPeerConnection({

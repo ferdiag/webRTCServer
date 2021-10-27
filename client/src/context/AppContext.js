@@ -76,7 +76,6 @@ function AppContextProvider({ children }) {
     peer.ontrack = e => {
       setIsVideoConference(true)
       //Receiving an object from the server wich includes the stream.  
-      //Creating a video element and append this to the videoContainerRef.
       //The id is set for identifying and destroying the videoelement.    
 
       // args:
@@ -108,7 +107,7 @@ function AppContextProvider({ children }) {
     // This function sets the local description which is essential for establishing a connection via webrtc.
     
     // args:
-    // @peer(object): the peer object needs a local- and a remote desctripton for a connection. In this function you set the local.
+    // @peer(object): the peer object needs a local- and a remote desctripton for a connection.
     // @target(string): the targeted endpoint on the server sidee.
     // @targetData (object): this object is not empty if the target is "createReceivingStreams". In this case the keys are emailOfCreator and IdOfTargetRoom.
 
@@ -140,8 +139,7 @@ function AppContextProvider({ children }) {
   //This useEffect is waiting for incoming data to create a peerconnection for receiving a stream. 
   
   // args:
-  //@createPeer (function): creating a new Peer connection
-  //@addTransceiver(function): adds a tunnel for receiving and sending streams through the webrtc connection
+  //@addTransceiver(function): adds a tunnel for receiving and sending streams through the webrtc connection.
   //@data (object): just for transport and to identyfy the broadcaster on server side. This object contains the key value pair of emailOfCreator and IdOfTargetRoom.
 
     socket.on('invitationforReceivingAStream', data => {
@@ -155,10 +153,10 @@ function AppContextProvider({ children }) {
 
   useEffect(() => {
   // This socket gets the answer from the handlenegotionationneeded function (action=createReceivingStreams). 
-  // First it finds the correct peer at the arrayOfReceiving array and then update the remoteDescription for establishing the webRtc connection.
+  // set the peer remoteDescription for establishing the webRtc connection.
   
   // args:
-  // @data (object): Includes the peerID to identry the correct peer at the arrayOfReceivingPeers array.
+  // @data (object): Includes the peerID to identy the correct peer at the arrayOfReceivingPeers array.
   
     socket.on('answerCreatePeerForReceivingStreams', data => {
       const targetPeer = arrayOfReceivingPeers.find(peer => peer.id === data.targetData.peerID)
@@ -171,13 +169,11 @@ function AppContextProvider({ children }) {
   }, [arrayOfReceivingPeers,setIsVideoConference])
 
   const handleReceiveDataFromDatachannel = () => {
-
-    //This function handles the incoming Data from the webRtc datachannel.
+    //Handles the incoming Data from the webRtc datachannel.
     
-    // args:
-    //@data(object): The keys of this object can differ but the data.action gives the information which if-statement will be exectuted.
-
     dataChannel.current.onmessage = (e) => {
+      // args:
+    //@e.data(object): The keys of this object can differ but the data.action gives the information which if-statement will be exectuted.
       const data = JSON.parse(e.data)
       console.log(data)
       if (data.action === "login") {
