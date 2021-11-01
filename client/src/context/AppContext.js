@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useReducer } from "react"
 import { socket } from "../socket/"
 import { v4 as uuidv4 } from 'uuid';  //i use this library for creating id´s
-
+import createVideoElement from "../lib/createVideoElement";
 const AppContext = React.createContext()
 
 function AppContextProvider({ children }) {
@@ -15,7 +15,8 @@ function AppContextProvider({ children }) {
   
   const dataChannel = useRef();
   const roomsRef = useRef();  //roomsRef is an Array with all the Users rooms.
-  const videoContainerRef = useRef(); 
+  const videoContainerRef = useRef();
+  const localStreamRef = useRef() 
   const localPeerRef = useRef(); //the peer for broadcasting a video and establishing the datachannel.
   const [isVideoConference, setIsVideoConference] = useState(false)   //toggles if there is a videoconference
 
@@ -33,7 +34,7 @@ function AppContextProvider({ children }) {
 
     const action = 'createInitialConnection'
     const peer = createPeer(action);
-    console.log(socket.id)
+    
     dataChannel.current = peer.createDataChannel(`${socket.id}`)
     dataChannel.current.onopen = e => {
       dataChannel.current.send(JSON.stringify({
@@ -75,26 +76,15 @@ function AppContextProvider({ children }) {
 
     peer.ontrack = e => {
       setIsVideoConference(true)
+      console.log(e.streams[0])
       //Receiving an object from the server wich includes the stream.  
       //The id is set for identifying and destroying the videoelement.    
 
       // args:
       //e (object): this is an event object, which transports the stream. 
+      createVideoElement(e.streams[0])
+  
       
-      const videoContainer = document.getElementById('videoContainer')
-      const newElement = document.createElement('video')
-      const numberOfChildren = videoContainer.childElementCount
-
-      newElement.style.width = '400px';
-      newElement.style.height = '400px';
-
-      newElement.style.border = '1px black solid'
-      newElement.setAttribute('id', 'video' + numberOfChildren)
-
-      videoContainer.appendChild(newElement)
-      newElement.srcObject = e.streams[0];
-      newElement.play()
-      console.log(videoContainerRef)
       forceUpdate()
     }
     return peer
@@ -265,6 +255,7 @@ function AppContextProvider({ children }) {
       email, setEmail,
       forceUpdate,
       handleInitialConnection,
+      localStreamRef,
       videoContainerRef
     }}>
       {children}
