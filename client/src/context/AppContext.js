@@ -5,7 +5,7 @@ import createVideoElement from "../lib/createVideoElement";
 const AppContext = React.createContext()
 
 function AppContextProvider({ children }) {
-  const [arrayOfReceivingPeers, setArrayOfReceivingPeers] = useState([])    //a list of created peers for receiving videostreams of broadcasters
+ 
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [nickName, setNickname] = useState("")
   const [rooms, setRooms] = useState([])    
@@ -18,13 +18,13 @@ function AppContextProvider({ children }) {
   const roomsRef = useRef();  //roomsRef is an Array with all the Users rooms.
   const videoContainerRef = useRef();
   const localStreamRef = useRef() 
-  const arrayOfReceivingPeersRef = useRef()
+  const arrayOfReceivingPeersRef = useRef() //a list of created peers for receiving videostreams of broadcasters
   const localPeerRef = useRef(); //the peer for broadcasting a video and establishing the datachannel.
   const [isVideoConference, setIsVideoConference] = useState(false)   //toggles if there is a videoconference
 
 
   const handleInitialConnection = dataOfLogin => {
-
+   
     //This component creates the peer connection.
     // The Reference dataChannel.current is waiting until the readyState is open, then it will execute the socke.emit to send the data to the backend.
     
@@ -34,6 +34,7 @@ function AppContextProvider({ children }) {
     // @handleReceiveDataFromDatachannel(function): This function handles the receiving massages from the backend.
     // parent:Login.js
 
+    arrayOfReceivingPeersRef.current=[] 
     const action = 'createInitialConnection'
     const peer = createPeer(action);
     
@@ -53,7 +54,7 @@ function AppContextProvider({ children }) {
   }
  
   const createPeer = (target, targetData = {}) => {
-
+    console.log(arrayOfReceivingPeersRef)
     // This function creates a new peer object, then the id is set to identify the peer.
     // This is just importend if the the target is "createReceivingStreams".    
     
@@ -76,15 +77,14 @@ function AppContextProvider({ children }) {
 
     peer.onnegotiationneeded = () => handleNegotiationNeededEvent(peer, target, targetData)
 
-    peer.ontrack = (e,arrayOfReceivingPeers) => {
+    peer.ontrack = (e) => {
      
       //receive a track from the WebRtc channel
        // args:
       //e (object): this is an event object, which transports the stream. 
       setIsVideoConference(true)
-     
-      createVideoElement(e.streams[0],videoContainerRef,e,arrayOfReceivingPeersRef.current)
-
+      
+      createVideoElement(e.streams[0],videoContainerRef,setIsVideoConference,e,arrayOfReceivingPeersRef.current)
       forceUpdate()
     }
     return peer
@@ -131,15 +131,10 @@ function AppContextProvider({ children }) {
       const action = 'createPeerForReceivingStreams'
       const peer = createPeer(action, data);
       peer.addTransceiver("video", { direction: "recvonly" })
-
-      const updatedArray =[
-        ...arrayOfReceivingPeers, peer
-      ]
-      setArrayOfReceivingPeers(updatedArray)
-     if (!arrayOfReceivingPeersRef.current) arrayOfReceivingPeersRef.current=[]
+    
       arrayOfReceivingPeersRef.current=[...arrayOfReceivingPeersRef.current,peer]
     })
-  }, [ videoArray,setVideoArray,arrayOfReceivingPeers,setArrayOfReceivingPeers,arrayOfReceivingPeersRef])
+  }, [ videoArray,setVideoArray,arrayOfReceivingPeersRef])
 
   useEffect(() => {
   // This socket gets the answer from the handlenegotionationneeded function (action=createReceivingStreams). 
@@ -149,14 +144,14 @@ function AppContextProvider({ children }) {
   // @data (object): Includes the peerID to identy the correct peer at the arrayOfReceivingPeers array.
   
     socket.on('answerCreatePeerForReceivingStreams', data => {
-      const targetPeer = arrayOfReceivingPeers.find(peer => peer.id === data.targetData.peerID)
+      const targetPeer =  arrayOfReceivingPeersRef.current.find(peer => peer.id === data.targetData.peerID)
 
       if (targetPeer) {
         const desc = new RTCSessionDescription(data.sdp);
         targetPeer.setRemoteDescription(desc)
       } 
     })
-  }, [arrayOfReceivingPeers,videoContainerRef])
+  }, [ arrayOfReceivingPeersRef,videoContainerRef])
 
   const handleReceiveDataFromDatachannel = () => {
     //Handles the incoming Data from the webRtc datachannel.
@@ -257,7 +252,8 @@ function AppContextProvider({ children }) {
       forceUpdate,
       handleInitialConnection,
       localStreamRef,
-      videoContainerRef
+      videoContainerRef,
+      arrayOfReceivingPeersRef
     }}>
       {children}
     </AppContext.Provider>

@@ -16,10 +16,9 @@ const Room = () => {
 
     const [inputData, setInputData] = useState(initValChatInput)
 
-
     const handleClick = e => {
         e.preventDefault();
-        console.log(dataChannel.current.readyState)
+        // console.log(dataChannel.current.readyState)
        if (inputData.textinput.length===0){
            console.log("bitte machen sie eine Eingae")
            return
