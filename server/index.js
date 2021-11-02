@@ -90,14 +90,14 @@ io.on('connection', (socket) => {
   })
 
   function hendleReceiveData(e) {
-
+    
     // handles the incoming messages of a datachannel.
     // functions at: //./lib/hendleReceiveData
     // args:
     // @e(object): This object can have various keys but data.action is responsible what happend to the data.
 
     const data = JSON.parse(e.data)
-
+    console.log(dataChannel.readyState)
     if (data.action === "updateChat") {
       const returnOfUpdateChat = updateChat(data, Users)
       Users = returnOfUpdateChat

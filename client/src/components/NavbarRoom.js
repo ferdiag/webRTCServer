@@ -9,7 +9,7 @@ const NavbarRoom = () => {
   // Here the user can start and stop and change the stream to show his screen. 
   // parent: Chat.js.  
 
-  const { localPeerRef, dataChannel, email, nickName, indexOfActiveRoom, localStreamRef, roomsRef, isVideoConference, setIsVideoConference, } = useContext(AppContext)
+  const { localPeerRef,videoContainerRef, dataChannel, email, nickName, indexOfActiveRoom, localStreamRef, roomsRef, isVideoConference, setIsVideoConference, } = useContext(AppContext)
 
   const constraints = {
     audio: false,
@@ -63,7 +63,8 @@ const NavbarRoom = () => {
         })
         )
       }
-      createVideoElement(localStream)
+      createVideoElement(localStream,videoContainerRef)
+    
     }
 localStreamRef.current = localStream
 if (isVideoConference) {
@@ -90,7 +91,7 @@ return (
       onClick={handleShowScreen}>
       Bildschirm teilen
     </button>
-    <button>Aufnahme starten</button>
+    <button onClick={()=>console.log()}>Aufnahme starten</button>
   </div>
 )
 }

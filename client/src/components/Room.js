@@ -19,6 +19,7 @@ const Room = () => {
 
     const handleClick = e => {
         e.preventDefault();
+        console.log(dataChannel.current.readyState)
        if (inputData.textinput.length===0){
            console.log("bitte machen sie eine Eingae")
            return

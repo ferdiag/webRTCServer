@@ -12,11 +12,13 @@ function AppContextProvider({ children }) {
   const [email, setEmail] = useState("")
   const [ignored, forceUpdate] = useReducer(x => x + 1, 0); // forces to rerender the component.
   const [indexOfActiveRoom, setIndexOfActiveRoom] = useState(0)   //the index of the room which is currently shown.
+  const [videoArray,setVideoArray] = useState([])
   
   const dataChannel = useRef();
   const roomsRef = useRef();  //roomsRef is an Array with all the Users rooms.
   const videoContainerRef = useRef();
   const localStreamRef = useRef() 
+  const arrayOfReceivingPeersRef = useRef()
   const localPeerRef = useRef(); //the peer for broadcasting a video and establishing the datachannel.
   const [isVideoConference, setIsVideoConference] = useState(false)   //toggles if there is a videoconference
 
@@ -74,17 +76,15 @@ function AppContextProvider({ children }) {
 
     peer.onnegotiationneeded = () => handleNegotiationNeededEvent(peer, target, targetData)
 
-    peer.ontrack = e => {
-      setIsVideoConference(true)
-      console.log(e.streams[0])
-      //Receiving an object from the server wich includes the stream.  
-      //The id is set for identifying and destroying the videoelement.    
-
-      // args:
+    peer.ontrack = (e,arrayOfReceivingPeers) => {
+     
+      //receive a track from the WebRtc channel
+       // args:
       //e (object): this is an event object, which transports the stream. 
-      createVideoElement(e.streams[0])
-  
-      
+      setIsVideoConference(true)
+     
+      createVideoElement(e.streams[0],videoContainerRef,e,arrayOfReceivingPeersRef.current)
+
       forceUpdate()
     }
     return peer
@@ -112,11 +112,6 @@ function AppContextProvider({ children }) {
       targetData
     } 
    
-    const updatedArray =[
-      ...arrayOfReceivingPeers, peer
-    ]
-    target === "createPeerForReceivingStreams" && setArrayOfReceivingPeers(updatedArray)
-   
     socket.emit(`${target}`, payload, data => {
       console.log('got data back')
       const desc = new RTCSessionDescription(data.sdp);
@@ -136,10 +131,15 @@ function AppContextProvider({ children }) {
       const action = 'createPeerForReceivingStreams'
       const peer = createPeer(action, data);
       peer.addTransceiver("video", { direction: "recvonly" })
+
+      const updatedArray =[
+        ...arrayOfReceivingPeers, peer
+      ]
+      setArrayOfReceivingPeers(updatedArray)
+     if (!arrayOfReceivingPeersRef.current) arrayOfReceivingPeersRef.current=[]
+      arrayOfReceivingPeersRef.current=[...arrayOfReceivingPeersRef.current,peer]
     })
-  }, [])
-
-
+  }, [ videoArray,setVideoArray,arrayOfReceivingPeers,setArrayOfReceivingPeers,arrayOfReceivingPeersRef])
 
   useEffect(() => {
   // This socket gets the answer from the handlenegotionationneeded function (action=createReceivingStreams). 
@@ -150,13 +150,13 @@ function AppContextProvider({ children }) {
   
     socket.on('answerCreatePeerForReceivingStreams', data => {
       const targetPeer = arrayOfReceivingPeers.find(peer => peer.id === data.targetData.peerID)
-      
+
       if (targetPeer) {
         const desc = new RTCSessionDescription(data.sdp);
         targetPeer.setRemoteDescription(desc)
       } 
     })
-  }, [arrayOfReceivingPeers,setIsVideoConference])
+  }, [arrayOfReceivingPeers,videoContainerRef])
 
   const handleReceiveDataFromDatachannel = () => {
     //Handles the incoming Data from the webRtc datachannel.
@@ -165,7 +165,7 @@ function AppContextProvider({ children }) {
       // args:
     //@e.data(object): The keys of this object can differ but the data.action gives the information which if-statement will be exectuted.
       const data = JSON.parse(e.data)
-      console.log(data)
+     
       if (data.action === "login") {
         setIsLoggedIn(true)
         setNickname(data.srcUser.nickName)
@@ -244,6 +244,7 @@ function AppContextProvider({ children }) {
 
   return (
     <AppContext.Provider value={{
+      videoArray,setVideoArray,
       isVideoConference, setIsVideoConference,
       indexOfActiveRoom, setIndexOfActiveRoom,
       isLoggedIn, setIsLoggedIn,
