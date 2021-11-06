@@ -22,7 +22,6 @@ function AppContextProvider({ children }) {
   const localPeerRef = useRef(); //the peer for broadcasting a video and establishing the datachannel.
   const [isVideoConference, setIsVideoConference] = useState(false)   //toggles if there is a videoconference
 
-
   const handleInitialConnection = dataOfLogin => {
    
     //This component creates the peer connection.
@@ -59,7 +58,7 @@ function AppContextProvider({ children }) {
     // This is just importend if the the target is "createReceivingStreams".    
     
     // args:
-    // @target(string): endpoint where to send the data.
+    // @target(string): endpoint, where to send the data.
     // @targetData (object): this object is not empty if the value of the targetstring is createReceivingStreams. 
      
     let peer = new RTCPeerConnection({
@@ -85,6 +84,7 @@ function AppContextProvider({ children }) {
       setIsVideoConference(true)
       
       createVideoElement(e.streams[0],videoContainerRef,setIsVideoConference,e,arrayOfReceivingPeersRef.current)
+      
       forceUpdate()
     }
     return peer
@@ -106,6 +106,7 @@ function AppContextProvider({ children }) {
     peer.socketOfSender = socket.id
 
     if (target === "createInitialConnection") localPeerRef.current = peer
+    
     const payload = {
       sdp: peer.localDescription,
       socketOfSender: socket.id,

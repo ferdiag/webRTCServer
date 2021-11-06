@@ -51,7 +51,8 @@ const NavbarRoom = () => {
       if (!isVideoConference) {
         
         localPeerRef.current.roomId = roomsRef.current[indexOfActiveRoom].roomId
-    localStream.getTracks().forEach(track => localPeerRef.current.addTrack(track, localStream));
+        localStream.getTracks().forEach(track => localPeerRef.current.addTrack(track, localStream));
+        
         dataChannel.current.send(JSON.stringify({
           streamId: localStream.id,
           sender: socket.id,
@@ -62,37 +63,39 @@ const NavbarRoom = () => {
           action: 'startVideoConference'
         })
         )
-        createVideoElement(localStream,videoContainerRef,setIsVideoConference,e="localstream",arrayOfReceivingPeersRef.current,localPeerRef)
+        const kindOfStream = "localstream"
+      createVideoElement(localStream,videoContainerRef,setIsVideoConference,kindOfStream,arrayOfReceivingPeersRef.current,localPeerRef)
+     
       } 
     }
-localStreamRef.current = localStream
-if (isVideoConference) {
-  const stream = localStreamRef.current;
-  const tracks = stream.getTracks();
+    localStreamRef.current = localStream
+    if (isVideoConference) {
+      const stream = localStreamRef.current;
+      const tracks = stream.getTracks();
 
-  tracks.forEach((track) => {
-    track.stop();
-  });
-  setIsVideoConference(false)
-}
-  }
+      tracks.forEach((track) => {
+        track.stop();
+      });
+      setIsVideoConference(false)
+      }
+    }
 
-return (
-  <div>
-    <div>{nickName}</div>
-    <button onClick={handleShowVideoConference}>{
-      !isVideoConference ?
-        "Videokonferenz starten"
-        :
-        "Videokonferenz beenden"
-    }</button>
-    <button
-      onClick={handleShowScreen}>
-      Bildschirm teilen
-    </button>
-    <button onClick={()=>console.log()}>Aufnahme starten</button>
-  </div>
-)
+  return (
+    <div>
+      <div>{nickName}</div>
+      <button onClick={handleShowVideoConference}>{
+        !isVideoConference ?
+          "Videokonferenz starten"
+          :
+          "Videokonferenz beenden"
+      }</button>
+      <button
+        onClick={handleShowScreen}>
+        Bildschirm teilen
+      </button>
+      <button onClick={()=>console.log(arrayOfReceivingPeersRef)}>Aufnahme starten</button>
+    </div>
+  )
 }
 
 export default NavbarRoom

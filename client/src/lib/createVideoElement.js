@@ -1,5 +1,4 @@
-const createVideoElement = (stream, videoContainerRef, setIsVideoConference, event, arrayOfPeers = [],localPeerRef) => {
-    console.log(stream, videoContainerRef, setIsVideoConference, event, arrayOfPeers = [],localPeerRef)
+const createVideoElement = (stream, videoContainerRef, setIsVideoConference, e, arrayOfPeers = [], localPeerRef) => {
     //This function creates html elements for the streams and handels the delete button for streams.
     //componennts: Navbarroom, AppContext
 
@@ -23,7 +22,7 @@ const createVideoElement = (stream, videoContainerRef, setIsVideoConference, eve
     videoelement.style.height = '100%';
 
     newDiv.setAttribute('id', 'video' + numberOfChildren)
-    
+
     const button = document.createElement('button')
     button.style.width = '50px';
     button.style.height = '50px';
@@ -31,7 +30,7 @@ const createVideoElement = (stream, videoContainerRef, setIsVideoConference, eve
     button.innerHTML = "X"
 
     button.onclick = (e) => {
-       
+        console.log(arrayOfPeers)
         // extracts the index from the event and stops the stream,
         // finds the peer and close the connection
         // takes the index and removes the element from the dom. 
@@ -53,24 +52,18 @@ const createVideoElement = (stream, videoContainerRef, setIsVideoConference, eve
         tracks.forEach((track) => {
             track.stop();
         });
-      
-        if(event==="localstream"){
-            localPeerRef.current.close()
-            localPeerRef.current={}
-        }else{
-             const targetPeerId = event.currentTarget.id
-        const targetPeer = arrayOfPeers.find(peer => peer.id === targetPeerId)
-        targetPeer.close()
-    }
-       
 
-       
-
+        if (e != "localstream") {
+            const targetPeerId = e.currentTarget.id
+            const filteredArray  = arrayOfPeers.filter(peer => peer.id != targetPeerId)
+            arrayOfPeers.current=filteredArray
+        }
         const targetEl = document.getElementById(`${id}`)
 
         targetEl.remove()
 
         videoContainerRef.current.children.length === 0 && setIsVideoConference(false)
+       
     }
     newDiv.appendChild(button)
     newDiv.appendChild(videoelement)
@@ -78,6 +71,7 @@ const createVideoElement = (stream, videoContainerRef, setIsVideoConference, eve
     videoelement.srcObject = stream;
 
     videoelement.play()
+  
 }
 
 export default createVideoElement

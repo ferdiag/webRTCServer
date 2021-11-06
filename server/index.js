@@ -10,7 +10,7 @@ const server = require('http').createServer(app)
 const io = require('socket.io')(server, { cors: { origin: '*' }, });
 const cors = require('cors');
 
-let Users=require('./FakeUsers')    //list of dummies
+let Users = require('./FakeUsers')    //list of dummies
 let listOfPeers = []
 
 app.use(cors())
@@ -47,21 +47,22 @@ io.on('connection', (socket) => {
       console.log("track received")
       const socketString = peer.socketOfSender.toString()
       const indexOfCreator = Users.findIndex(user => user.socket === socketString)
-     
+
       if (indexOfCreator >= 0) {
         Users[indexOfCreator].stream = e.streams[0]
 
         const targetRoom = Users[indexOfCreator].createdRooms.find(room => room.isVideoConference === true)
-      
-        if(targetRoom){
-             const filteredTargetRoom = targetRoom.members.filter(member => member.email != Users[indexOfCreator].email && member.isLoggedIn === true)
-        filteredTargetRoom.forEach(member => {
-          io.to(`${member.socket}`).emit('invitationforReceivingAStream', {
-            emailOfCreator: Users[indexOfCreator].email,
-            IdOfTargetRoom: targetRoom.roomId
+
+        if (targetRoom) {
+          const filteredTargetRoom = targetRoom.members.filter(member => member.email != Users[indexOfCreator].email && member.isLoggedIn === true)
+          
+          filteredTargetRoom.forEach(member => {
+            io.to(`${member.socket}`).emit('invitationforReceivingAStream', {
+              emailOfCreator: Users[indexOfCreator].email,
+              IdOfTargetRoom: targetRoom.roomId
+            })
           })
-        })
-        }else{
+        } else {
           console.log("es gibt keine Videokonferenz")
         }
       }
@@ -90,7 +91,7 @@ io.on('connection', (socket) => {
   })
 
   function hendleReceiveData(e) {
-    
+
     // handles the incoming messages of a datachannel.
     // functions at: //./lib/hendleReceiveData
     // args:
@@ -113,7 +114,7 @@ io.on('connection', (socket) => {
     //search a User//
 
     if (data.action === "searchUser") {
-     const returnOfSearchUser= searchUser(data, Users)
+      const returnOfSearchUser = searchUser(data, Users)
       Users = returnOfSearchUser
     }
 
@@ -123,19 +124,20 @@ io.on('connection', (socket) => {
       const returnOfLogin = login(data, Users, listOfPeers)
       Users = returnOfLogin
     }
+
     //start videoconference
     if (data.action === "startVideoConference") {
       console.log("started Videoconference")
       const indexOfCreator = Users.findIndex(user => user.email === data.emailOfCreator)
       const indexOfTargetRoom = Users[indexOfCreator].createdRooms.findIndex(room => room.roomId === data.roomId)
-      Users[indexOfCreator].createdRooms[indexOfTargetRoom].isVideoConference=true 
+      Users[indexOfCreator].createdRooms[indexOfTargetRoom].isVideoConference = true
     }
   }
 
   //consumer//
 
   socket.on('createPeerForReceivingStreams', async (data) => {
-  
+
     // creating the remote part of the webRtc connection for receiver of streams.
     //  Find the creator of the videconference 
     // and add the stream to the peer 
