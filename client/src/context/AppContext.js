@@ -12,7 +12,7 @@ function AppContextProvider({ children }) {
   const [email, setEmail] = useState("")
   const [ignored, forceUpdate] = useReducer(x => x + 1, 0); // forces to rerender the component.
   const [indexOfActiveRoom, setIndexOfActiveRoom] = useState(0)   //the index of the room which is currently shown.
-  const [videoArray,setVideoArray] = useState([])
+  const [arrayOfStreams,setArrayOfStreams] = useState([])
   
   const dataChannel = useRef();
   const roomsRef = useRef();  //roomsRef is an Array with all the Users rooms.
@@ -53,7 +53,7 @@ function AppContextProvider({ children }) {
   }
  
   const createPeer = (target, targetData = {}) => {
-    console.log(arrayOfReceivingPeersRef)
+
     // This function creates a new peer object, then the id is set to identify the peer.
     // This is just importend if the the target is "createReceivingStreams".    
     
@@ -77,13 +77,12 @@ function AppContextProvider({ children }) {
     peer.onnegotiationneeded = () => handleNegotiationNeededEvent(peer, target, targetData)
 
     peer.ontrack = (e) => {
-     
+   
       //receive a track from the WebRtc channel
        // args:
       //e (object): this is an event object, which transports the stream. 
       setIsVideoConference(true)
-      
-      createVideoElement(e.streams[0],videoContainerRef,setIsVideoConference,e,arrayOfReceivingPeersRef.current)
+      setArrayOfStreams([...arrayOfStreams,e.streams[0]])
       
       forceUpdate()
     }
@@ -135,7 +134,7 @@ function AppContextProvider({ children }) {
     
       arrayOfReceivingPeersRef.current=[...arrayOfReceivingPeersRef.current,peer]
     })
-  }, [ videoArray,setVideoArray,arrayOfReceivingPeersRef])
+  }, [arrayOfReceivingPeersRef])
 
   useEffect(() => {
   // This socket gets the answer from the handlenegotionationneeded function (action=createReceivingStreams). 
@@ -240,7 +239,7 @@ function AppContextProvider({ children }) {
 
   return (
     <AppContext.Provider value={{
-      videoArray,setVideoArray,
+      arrayOfStreams,setArrayOfStreams,
       isVideoConference, setIsVideoConference,
       indexOfActiveRoom, setIndexOfActiveRoom,
       isLoggedIn, setIsLoggedIn,

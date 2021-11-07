@@ -9,7 +9,20 @@ const NavbarRoom = () => {
   // Here the user can start and stop and change the stream to show his screen. 
   // parent: Chat.js.  
 
-  const { localPeerRef,videoContainerRef, dataChannel, email, nickName,arrayOfReceivingPeersRef, indexOfActiveRoom, localStreamRef, roomsRef, isVideoConference, setIsVideoConference, } = useContext(AppContext)
+  const {
+     localPeerRef,
+     videoContainerRef,
+      dataChannel, 
+      email, 
+      nickName,
+      indexOfActiveRoom,
+      localStreamRef,
+      roomsRef,
+      isVideoConference, 
+      setIsVideoConference,
+      arrayOfStreams,
+      setArrayOfStreams
+   } = useContext(AppContext)
 
   const constraints = {
     audio: false,
@@ -37,7 +50,7 @@ const NavbarRoom = () => {
   }
 
   const handleShowVideoConference = async e => {
-    console.log(arrayOfReceivingPeersRef)
+   
     // This function takes the getUserMedia method from the navigator.mediaDevices object to get access
     //  to the camera and adds the result to the Peer connection. To inform the members of the room that a 
     // video conference started, you send an object to the backend.   
@@ -64,7 +77,9 @@ const NavbarRoom = () => {
         })
         )
         const kindOfStream = "localstream"
-      createVideoElement(localStream,videoContainerRef,setIsVideoConference,kindOfStream,arrayOfReceivingPeersRef.current,localPeerRef)
+
+        setArrayOfStreams([...arrayOfStreams,localStream])
+        // createVideoElement(localStream,videoContainerRef,setIsVideoConference,kindOfStream,arrayOfReceivingPeersRef.current,localPeerRef)
       } 
     }
     localStreamRef.current = localStream
@@ -92,7 +107,7 @@ const NavbarRoom = () => {
         onClick={handleShowScreen}>
         Bildschirm teilen
       </button>
-      <button onClick={()=>console.log(arrayOfReceivingPeersRef)}>Aufnahme starten</button>
+      <button onClick={()=>console.log(arrayOfStreams)}>Aufnahme starten</button>
     </div>
   )
 }
