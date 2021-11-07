@@ -9,7 +9,6 @@ const Login = () => {
 
     const handleClick = () => {
         handleInitialConnection(inputData)
-        console.log(dataChannel.current.readyState)
     }
     
     return (
