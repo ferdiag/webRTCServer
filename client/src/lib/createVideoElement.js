@@ -1,4 +1,4 @@
-const createVideoElement = (stream, videoContainerRef, setIsVideoConference, e, arrayOfPeers = [], localPeerRef) => {
+const createVideoElement = (stream, videoContainerRef, setIsVideoConference, e, arrayOfPeers = [], onDelete) => {
     //This function creates html elements for the streams and handels the delete button for streams.
     //componennts: Navbarroom, AppContext
 
@@ -7,7 +7,7 @@ const createVideoElement = (stream, videoContainerRef, setIsVideoConference, e, 
     //@videoContainerRef(object): all the created elemnts will be children of this object. 
     // event(obj): if the stream is received from a braodcaster, 
     // its the event of the ontrack event otherwise its an empty object. 
-    //localPeerRef(obj):The peer of the broadcaster, you will need it because its not in the arrayOfPeers
+    //onDelete(obj):The peer of the broadcaster, you will need it because its not in the arrayOfPeers
 
     const videoContainer = document.getElementById('videoContainer')
     const newDiv = document.createElement('div')
@@ -56,7 +56,7 @@ const createVideoElement = (stream, videoContainerRef, setIsVideoConference, e, 
         if (e != "localstream") {
             const targetPeerId = e.currentTarget.id
             const filteredArray  = arrayOfPeers.filter(peer => peer.id != targetPeerId)
-            arrayOfPeers.current=filteredArray
+         
         }
         const targetEl = document.getElementById(`${id}`)
 

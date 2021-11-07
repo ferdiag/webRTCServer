@@ -65,7 +65,6 @@ const NavbarRoom = () => {
         )
         const kindOfStream = "localstream"
       createVideoElement(localStream,videoContainerRef,setIsVideoConference,kindOfStream,arrayOfReceivingPeersRef.current,localPeerRef)
-     
       } 
     }
     localStreamRef.current = localStream
