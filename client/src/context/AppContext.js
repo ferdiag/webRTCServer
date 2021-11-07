@@ -78,7 +78,7 @@ function AppContextProvider({ children }) {
        //receive a track from the WebRtc channel, create streamObject and set the peerId for identification at VideoContainer.js
        // args:
       //e (object): this is an event object, which transports the stream. 
-     
+     console.log(arrayOfStreams)
      const streamObject={
         stream:e.streams[0],
         peer:e.currentTarget
@@ -86,11 +86,7 @@ function AppContextProvider({ children }) {
      
       setIsVideoConference(true)
       setArrayOfStreams([...arrayOfStreams,streamObject])
-      
-      forceUpdate()
     }
-    console.log(peer)
-  
     return peer
   }
 
@@ -136,9 +132,13 @@ function AppContextProvider({ children }) {
       const action = 'createPeerForReceivingStreams'
       const peer = createPeer(action, data);
       peer.addTransceiver("video", { direction: "recvonly" })
-      
+      const updatedArray=[...arrayOfStreams,{
+        peer,stream:{}
+      }]
+     
+      setArrayOfStreams(updatedArray)
     })
-  }, [])
+  }, [setArrayOfStreams,arrayOfStreams])
 
   useEffect(() => {
   // This socket gets the answer from the handlenegotionationneeded function (action=createReceivingStreams). 
@@ -148,14 +148,16 @@ function AppContextProvider({ children }) {
   // @data (object): Includes the peerID to identy the correct peer at the arrayOfStreams.
   
     socket.on('answerCreatePeerForReceivingStreams', data => {
-      const targetPeer =  arrayOfStreams.current.find(streamObject => streamObject.peer.id === data.targetData.peerID)
-
+     
+      const targetPeer =  arrayOfStreams.find(streamObject => streamObject.peer.id === data.targetData.peerID)
+      console.log(targetPeer)
       if (targetPeer) {
         const desc = new RTCSessionDescription(data.sdp);
-        targetPeer.setRemoteDescription(desc)
+        targetPeer.peer.setRemoteDescription(desc)
       } 
     })
-  }, [videoContainerRef])
+    console.log(arrayOfStreams)
+  }, [videoContainerRef,arrayOfStreams])
 
   const handleReceiveDataFromDatachannel = () => {
     //Handles the incoming Data from the webRtc datachannel.
