@@ -1,7 +1,6 @@
 const createVideoElement = (stream, videoContainerRef, setIsVideoConference, e, arrayOfPeers = [], onDelete) => {
     //This function creates html elements for the streams and handels the delete button for streams.
-    //componennts: Navbarroom, AppContext
-
+    //componennts:
     //args:
     //@stream(object): stream gets injected to the videoElemnt.
     //@videoContainerRef(object): all the created elemnts will be children of this object. 

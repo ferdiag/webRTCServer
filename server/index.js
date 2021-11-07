@@ -98,7 +98,7 @@ io.on('connection', (socket) => {
     // @e(object): This object can have various keys but data.action is responsible what happend to the data.
 
     const data = JSON.parse(e.data)
-    console.log(dataChannel.readyState)
+    console.log(dataChannel.readyState,data)
     if (data.action === "updateChat") {
       const returnOfUpdateChat = updateChat(data, Users)
       Users = returnOfUpdateChat
@@ -124,7 +124,10 @@ io.on('connection', (socket) => {
       const returnOfLogin = login(data, Users, listOfPeers)
       Users = returnOfLogin
     }
-
+    if (data.action === "delete") {
+      const returnOfDelete = login(data, Users, listOfPeers)
+      Users = returnOfLogin
+    }
     //start videoconference
     if (data.action === "startVideoConference") {
       console.log("started Videoconference")
