@@ -9,9 +9,7 @@ const NavbarRoom = () => {
   // parent: Chat.js.
 
   const {
-    ArrayOfReceivingPeers,
     localPeerRef,
-    videoContainerRef,
     dataChannel,
     email,
     nickName,
@@ -107,7 +105,7 @@ const NavbarRoom = () => {
           : "Videokonferenz beenden"}
       </button>
       <button onClick={handleShowScreen}>Bildschirm teilen</button>
-      <button onClick={() => console.log(ArrayOfReceivingPeers)}>
+      <button onClick={() => console.log(arrayOfStreams)}>
         Aufnahme starten
       </button>
     </div>

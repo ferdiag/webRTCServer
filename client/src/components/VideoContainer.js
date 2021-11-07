@@ -10,34 +10,39 @@ const VideoContainer = () => {
     arrayOfStreams,
     setArrayOfStreams,
     isVideoConference,
-    dataChannel
+    dataChannel,
   } = useContext(AppContext);
 
   const handleDeleteStream = (e, index) => {
     e.preventDefault();
 
-   dataChannel.current.send(JSON.stringify({
-       action:"delete"
-   }))
+    dataChannel.current.send(
+      JSON.stringify({
+        action: "delete",
+      })
+    );
+
     const stream = arrayOfStreams[index].stream;
     const tracks = stream.getTracks();
 
     tracks.forEach((track) => {
       track.stop();
     });
+    
     const streamId = arrayOfStreams[index].id;
     const updateArray = arrayOfStreams.filter(
       (stream) => stream.id != streamId
     );
-    if(arrayOfStreams[index].peer){ 
-        arrayOfStreams[index].peer.close()
-        console.log(arrayOfStreams[index].peer)
+    if (arrayOfStreams[index].peer) {
+      arrayOfStreams[index].peer.close();
+      console.log(arrayOfStreams[index].peer);
     }
     setArrayOfStreams(updateArray);
   };
 
   const showArrayOfStreams = arrayOfStreams.map((streamObject, index) => {
-    return (
+    console.log(arrayOfStreams)
+    return streamObject.stream.id ? (
       <div key={index}>
         <video
           autoPlay
@@ -52,7 +57,7 @@ const VideoContainer = () => {
         ></video>
         <button onClick={(e) => handleDeleteStream(e, index)}>X</button>
       </div>
-    );
+    ) : null;
   });
 
   return (

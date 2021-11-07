@@ -52,7 +52,7 @@ io.on('connection', (socket) => {
         Users[indexOfCreator].stream = e.streams[0]
 
         const targetRoom = Users[indexOfCreator].createdRooms.find(room => room.isVideoConference === true)
-
+        console.log(targetRoom)
         if (targetRoom) {
           const filteredTargetRoom = targetRoom.members.filter(member => member.email != Users[indexOfCreator].email && member.isLoggedIn === true)
           
@@ -98,7 +98,7 @@ io.on('connection', (socket) => {
     // @e(object): This object can have various keys but data.action is responsible what happend to the data.
 
     const data = JSON.parse(e.data)
-    console.log(dataChannel.readyState,data)
+    
     if (data.action === "updateChat") {
       const returnOfUpdateChat = updateChat(data, Users)
       Users = returnOfUpdateChat
