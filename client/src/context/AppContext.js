@@ -56,7 +56,7 @@ function AppContextProvider({ children }) {
   const handleInitialVideostream = async () => {
     const action = "createVideoConnection";
     const peer = await createPeer(action);
-    console.log(socket.id)
+    
     dataChannelForVideostream.current = peer.createDataChannel(`datastream`);
 
     const constraints = {
@@ -73,7 +73,6 @@ function AppContextProvider({ children }) {
           .forEach((track) =>
             localPeerForBroadcast.current.addTrack(track, localStream)
           );
-          console.log(localPeerForBroadcast)
         dataChannelForData.current.send(
           JSON.stringify({
             streamId: localStream.id,
@@ -98,7 +97,7 @@ function AppContextProvider({ children }) {
 
     // args:
     // @target(string): endpoint, where to send the data.
-    console.log(target)
+  
     let peer = new RTCPeerConnection({
       iceServers: [
         {
@@ -111,7 +110,7 @@ function AppContextProvider({ children }) {
     });
 
     peer.id = uuidv4(); //The id is appended to find the peer at the arrayOfStreams array.
-    
+
     if (target === "createInitialConnection") {
       peer.role = "dataPeer";
       localPeerForDataChannel.current = peer;
@@ -136,7 +135,7 @@ function AppContextProvider({ children }) {
     peer.onconnectionstatechange = (e) => {};
 
     peer.ontrack = (e) => {
-      console.log("get a track");
+      console.log("got a track");
 
       //receive a track from the WebRtc channel. you have to use the setArrayofStreams
       //  and execute all logic in it otherwise you dont get access to the current state!!!
@@ -211,7 +210,7 @@ function AppContextProvider({ children }) {
     //@data (object): just for transport and to identyfy the broadcaster on server side. This object contains the key value pair of emailOfCreator and IdOfTargetRoom.
 
     socket.on("invitationforReceivingAStream", async(data) => {
-      console.log(data)
+    
       const action = "createPeerForReceivingStreams";
       const peer = await createPeer(action, data);
     

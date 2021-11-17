@@ -197,7 +197,7 @@ io.on("connection", (socket) => {
 
     const answer = await peer.createAnswer();
     await peer.setLocalDescription(answer);
-    console.log(data.socketOfSender)
+    
     const payload = {
       sdp: peer.localDescription,
       emailOfCreator:data.emailOfCreator,

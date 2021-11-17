@@ -21,7 +21,6 @@ const VideoContainer = () => {
     // First, get the stream and stop it.
 
     e.preventDefault();
-   console.log(roomsRef[indexOfActiveRoom])
    dataChannelForData.current.send(
       JSON.stringify({
         action: "delete",
@@ -41,7 +40,7 @@ const VideoContainer = () => {
       (stream) => stream.id != streamId
     );
     if (arrayOfStreams[index].peer === "externalStream") {
-      console.log(arrayOfStreams[index].peer);
+    
       //If there is a peer, the peer conenction will be closed.
       // This is important, because you dont want to close the local peer connection.
       arrayOfStreams[index].peer.close();

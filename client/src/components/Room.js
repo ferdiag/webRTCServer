@@ -18,7 +18,6 @@ const Room = () => {
 
     const handleClick = e => {
         e.preventDefault();
-        // console.log(dataChannel.current.readyState)
        if (inputData.textinput.length===0){
            console.log("bitte machen sie eine Eingae")
            return
@@ -58,7 +57,6 @@ const Room = () => {
         }
         //um den Chat an die erste Stelle zu bringen splice und unshift
         forceUpdate()
-        console.log(roomsRef.current[0].chat)
         setInputData(initValChatInput)
     }
     const showArray = !roomsRef.current || roomsRef.current.length === 0 ? console.log("now array there") : roomsRef.current[indexOfActiveRoom].chat.map((chatInfo, index) =>
