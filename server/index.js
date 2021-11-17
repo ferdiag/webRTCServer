@@ -12,7 +12,6 @@ const io = require("socket.io")(server, { cors: { origin: "*" } });
 const cors = require("cors");
 
 let Users = require("./FakeUsers"); //list of dummies
-let listOfPeers = [];
 
 app.use(cors());
 
