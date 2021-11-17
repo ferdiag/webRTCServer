@@ -39,7 +39,6 @@ io.on("connection", (socket) => {
     const peer = createPeer(data);
 
     peer.ontrack = (e) => {
-      
       // This function handles the incoming streams.
       // The first step is to identify the creator of the stream,
       // then you assign the stream to the stream key of the creator.
@@ -148,7 +147,6 @@ io.on("connection", (socket) => {
     }
     if (data.action === "delete") {
       const returnOfDelete = deleteStream(data, Users);
-     
     }
     //start videoconference
     if (data.action === "startVideoConference") {
@@ -171,7 +169,7 @@ io.on("connection", (socket) => {
     // creating the remote part of the webRtc connection for receiver of streams.
     //  Find the creator of the videconference
     // and add the stream to the peer
-   
+
     const peer = new webrtc.RTCPeerConnection({
       iceServers: [
         {
@@ -188,8 +186,8 @@ io.on("connection", (socket) => {
     await peer.setRemoteDescription(desc);
     const indexOfCreator = Users.findIndex(
       (user) => user.email === data.emailOfCreator
-    ); 
-     
+    );
+
     Users[indexOfCreator].stream.getTracks().forEach((track) => {
       //adding the stream to the peer
       peer.addTrack(track, Users[indexOfCreator].stream);
@@ -197,13 +195,13 @@ io.on("connection", (socket) => {
 
     const answer = await peer.createAnswer();
     await peer.setLocalDescription(answer);
-    
+
     const payload = {
       sdp: peer.localDescription,
-      emailOfCreator:data.emailOfCreator,
-      peerID:data.peerID
+      emailOfCreator: data.emailOfCreator,
+      peerID: data.peerID,
     };
-   
+
     io.to(data.socketOfSender).emit(
       "answerCreatePeerForReceivingStreams",
       payload

@@ -1,4 +1,4 @@
-import React, { useContext,useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 import { AppContext } from "../context/AppContext";
 
 const VideoContainer = () => {
@@ -14,17 +14,16 @@ const VideoContainer = () => {
     isVideoConference,
     dataChannelForData,
     indexOfActiveRoom,
-    roomsRef
+    roomsRef,
   } = useContext(AppContext);
 
   const handleDeleteStream = (e, index) => {
     // First, get the stream and stop it.
 
     e.preventDefault();
-   dataChannelForData.current.send(
+    dataChannelForData.current.send(
       JSON.stringify({
         action: "delete",
-
       })
     );
 
@@ -40,7 +39,6 @@ const VideoContainer = () => {
       (stream) => stream.id != streamId
     );
     if (arrayOfStreams[index].peer === "externalStream") {
-    
       //If there is a peer, the peer conenction will be closed.
       // This is important, because you dont want to close the local peer connection.
       arrayOfStreams[index].peer.close();
@@ -48,7 +46,8 @@ const VideoContainer = () => {
     setArrayOfStreams(updateArray);
   };
 
-  const showArrayOfStreams = useMemo(       //useMemo handles the rerendering of the component. Rerender occurs just after a change of arrayOfStreams.
+  const showArrayOfStreams = useMemo(
+    //useMemo handles the rerendering of the component. Rerender occurs just after a change of arrayOfStreams.
     () =>
       arrayOfStreams.map((streamObject, index) => {
         return streamObject.stream.id ? (

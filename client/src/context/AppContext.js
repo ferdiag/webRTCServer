@@ -56,7 +56,7 @@ function AppContextProvider({ children }) {
   const handleInitialVideostream = async () => {
     const action = "createVideoConnection";
     const peer = await createPeer(action);
-    
+
     dataChannelForVideostream.current = peer.createDataChannel(`datastream`);
 
     const constraints = {
@@ -64,9 +64,7 @@ function AppContextProvider({ children }) {
       video: true,
     };
 
-    navigator.mediaDevices.getUserMedia(constraints)
-      .then((localStream) => {
-        
+    navigator.mediaDevices.getUserMedia(constraints).then((localStream) => {
       if (!isVideoConference) {
         localStream
           .getTracks()
@@ -91,13 +89,13 @@ function AppContextProvider({ children }) {
     });
   };
 
-  const createPeer = async (target,targetData) => {
+  const createPeer = async (target, targetData) => {
     // This function creates a new peer object, then the id is set to identify the peer.
     // This is just importend if the the target is "createReceivingStreams".
 
     // args:
     // @target(string): endpoint, where to send the data.
-  
+
     let peer = new RTCPeerConnection({
       iceServers: [
         {
@@ -119,17 +117,21 @@ function AppContextProvider({ children }) {
       peer.role = "videoPeer";
       localPeerForBroadcast.current = peer;
     }
-    if(target==="createPeerForReceivingStreams"){
-      setArrayOfStreams(currentArrayOfStreams=>{
-        return [...currentArrayOfStreams,{
-          stream:{},
-          peer,
-          role: "externalStream",
-        }] 
-      })
+    if (target === "createPeerForReceivingStreams") {
+      setArrayOfStreams((currentArrayOfStreams) => {
+        return [
+          ...currentArrayOfStreams,
+          {
+            stream: {},
+            peer,
+            role: "externalStream",
+          },
+        ];
+      });
     }
 
-    peer.onnegotiationneeded = () => handleNegotiationNeededEvent(peer, target,targetData);
+    peer.onnegotiationneeded = () =>
+      handleNegotiationNeededEvent(peer, target, targetData);
     peer.onicecandidate = (e) => {};
 
     peer.onconnectionstatechange = (e) => {};
@@ -164,7 +166,7 @@ function AppContextProvider({ children }) {
 
   //handleNegotiation
 
-  async function handleNegotiationNeededEvent(peer, target,targetData) {
+  async function handleNegotiationNeededEvent(peer, target, targetData) {
     // This function sets the local description which is essential for establishing a connection via webrtc.
     console.log("handleNegotiation is working");
     // args:
@@ -181,7 +183,7 @@ function AppContextProvider({ children }) {
       email,
       action: target,
       peerID: peer.id,
-      emailOfCreator:targetData && targetData.emailOfCreator
+      emailOfCreator: targetData && targetData.emailOfCreator,
     };
 
     socket.emit(`${target}`, payload, (data) => {
@@ -193,7 +195,6 @@ function AppContextProvider({ children }) {
         targetPeer = localPeerForDataChannel;
       if (data.action === "createVideoConnection")
         targetPeer = localPeerForBroadcast;
-       
 
       const desc = new RTCSessionDescription(data.sdp);
       targetPeer.current
@@ -209,13 +210,11 @@ function AppContextProvider({ children }) {
     //@addTransceiver(function): adds a tunnel for receiving and sending streams through the webrtc connection.
     //@data (object): just for transport and to identyfy the broadcaster on server side. This object contains the key value pair of emailOfCreator and IdOfTargetRoom.
 
-    socket.on("invitationforReceivingAStream", async(data) => {
-    
+    socket.on("invitationforReceivingAStream", async (data) => {
       const action = "createPeerForReceivingStreams";
       const peer = await createPeer(action, data);
-    
-      peer.addTransceiver("video", { direction: "recvonly" });
 
+      peer.addTransceiver("video", { direction: "recvonly" });
     });
   }, [setArrayOfStreams, arrayOfStreams]);
 
@@ -227,7 +226,7 @@ function AppContextProvider({ children }) {
     // @data (object): Includes the peerID to identy the correct peer at the arrayOfStreams.
 
     socket.on("answerCreatePeerForReceivingStreams", (data) => {
-      console.log("got answer",data)
+      console.log("got answer", data);
       const indexOfTargetStream = arrayOfStreams.findIndex(
         (streamObject) => streamObject.peer.id === data.peerID
       );

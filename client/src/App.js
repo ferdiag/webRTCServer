@@ -1,6 +1,5 @@
-import react, { useContext } from "react"
-import './App.css';
-
+import react, { useContext } from "react";
+import "./App.css";
 
 import Main from "./components/Main";
 import NavbarTop from "./components/NavbarTop";
@@ -9,13 +8,12 @@ import VideoContainer from "./components/VideoContainer";
 import { AppContext } from "./context/AppContext";
 
 function App() {
-
-  const { isVideoConference } = useContext(AppContext)
+  const { isVideoConference } = useContext(AppContext);
 
   return (
     <div className="App">
       <NavbarTop />
-     <VideoContainer />
+      <VideoContainer />
       <div style={{ display: "flex", flexDirection: "row", width: "100%" }}>
         <Sidebar />
         <Main />

@@ -75,11 +75,7 @@ const NavbarRoom = () => {
           : "Videokonferenz beitreten"}
       </button>
       <button onClick={handleShowScreen}>Bildschirm teilen</button>
-      <button
-        onClick={() =>
-          console.log(arrayOfStreams)
-        }
-      >
+      <button onClick={() => console.log(arrayOfStreams)}>
         Aufnahme starten
       </button>
     </div>
