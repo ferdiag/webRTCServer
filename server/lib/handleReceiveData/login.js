@@ -1,4 +1,4 @@
-module.exports = (data,Users,listOfPeers)=>{
+module.exports = (data,Users)=>{
     const srcUser = Users.find(user => user.email === data.email)
       const indexOfSender = Users.findIndex(user => user.email === data.email)
      
@@ -16,10 +16,10 @@ module.exports = (data,Users,listOfPeers)=>{
       Users[indexOfSender].isLoggedIn = true
       Users[indexOfSender].socket = data.socketOfSender
 
-      for (let i = 0; i < listOfPeers.length; i++) {   
-        if (listOfPeers[i].socketOfSender === data.socketOfSender)
-          Users[indexOfSender].peer = listOfPeers[i]
-      }
+      // for (let i = 0; i < listOfPeers.length; i++) {   
+      //   if (listOfPeers[i].socketOfSender === data.socketOfSender)
+      //     Users[indexOfSender].peer = listOfPeers[i]
+      // }
 
       let updatedRooms = []  //this array contains the rooms which the user already joined
 
@@ -44,8 +44,8 @@ module.exports = (data,Users,listOfPeers)=>{
 
       srcUser.rooms = updatedRooms
 
-      const updateListOfPeers = listOfPeers.filter(peer => peer.socketOfSender != data.socketOfSender)   
-      listOfPeers = updateListOfPeers
+      // const updateListOfPeers = listOfPeers.filter(peer => peer.socketOfSender != data.socketOfSender)   
+      // listOfPeers = updateListOfPeers
 
       Users[indexOfSender].dataChannel.send(JSON.stringify(
         {

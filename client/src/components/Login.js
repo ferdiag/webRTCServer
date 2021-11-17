@@ -1,13 +1,14 @@
 import React, { useState, useContext } from 'react'
 import { AppContext } from '../context/AppContext';
-import { socket } from '../socket';
+import { socket } from '../services';
 import { handleChange } from '../lib/handleChange';
 
 const Login = () => {
     const [inputData, setInputData] = useState({ email: "", password: "" })
-    const { handleInitialConnection, dataChannel } = useContext(AppContext)
+    const { handleInitialConnection } = useContext(AppContext)
 
-    const handleClick = () => {
+    const handleClick = (e) => {
+        e.preventDefault();
         handleInitialConnection(inputData)
     }
     

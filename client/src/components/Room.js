@@ -11,7 +11,7 @@ const Room = () => {
     //This componenet handles the chatinput and renders the components NavbarRoom.js, SearchandAddUserToAnExistingRoom.
     // parent:Main.js
 
-    const { indexOfActiveRoom, roomsRef, forceUpdate, dataChannel, nickName, email } = useContext(AppContext)
+    const { indexOfActiveRoom, roomsRef, forceUpdate, dataChannelForData, nickName, email } = useContext(AppContext)
     const initValChatInput = { textinput: "" }
 
     const [inputData, setInputData] = useState(initValChatInput)
@@ -44,8 +44,8 @@ const Room = () => {
 
         roomsRef.current = copyOfRooms
 
-        if (dataChannel.current.readyState === 'open') {
-            dataChannel.current.send(JSON.stringify({
+        if (dataChannelForData.current.readyState === 'open') {
+            dataChannelForData.current.send(JSON.stringify({
                 message: inputData.textinput,
                 nickName,
                 email,
@@ -65,7 +65,7 @@ const Room = () => {
         <li key={index} style={{ display: 'flex', width: "95%", paddingTop: "10px", paddingBottom: "10px" }}>
             <div style={chatInfo.nickName === nickName ? { width: "20%", marginLeft: "70%", backgroundColor: "teal", borderRadius: "5px", paddingTop: "2.5px", paddingBottom: "2.5px", paddingLeft: "10px", paddingRight: "10px" } : { width: "20%", marginLeft: "auto", backgroundColor: "AppWorkspace", borderRadius: "5px", paddingTop: "2.5px", paddingBottom: "2.5px", paddingLeft: "10px", paddingRight: "10px" }}>
                 <div style={{ marginLeft: "5px", fontSize: "10px" }} >{chatInfo.nickName} sagte:</div>
-                <div style={{}}>{chatInfo.message}</div>
+                <div>{chatInfo.message}</div>
                 <div style={{ fontSize: "9px" }}> um {chatInfo.timestamp.hours}:{chatInfo.timestamp.minute}</div>
                 <div style={{ fontSize: "9px" }}> am{chatInfo.timestamp.day}:{chatInfo.timestamp.month}:{chatInfo.timestamp.year}</div>
             </div>

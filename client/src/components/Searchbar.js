@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react'
 import { AppContext } from '../context/AppContext';
 import { handleChange } from '../lib/handleChange';
-import { socket } from '../socket';
+import { socket } from '../services';
 import { v4 as uuidv4 } from 'uuid';
 
 export const Searchbar = () => {
@@ -9,15 +9,15 @@ export const Searchbar = () => {
     //handles the searchinput to find an existing user with its email.
     //parent:NavbarTop.js
     
-    const { dataChannel, nickName, email } = useContext(AppContext)
+    const { dataChannelForData, nickName, email } = useContext(AppContext)
     const [inputData, setInputData] = useState({ searchInput: "" })
 
     const handleSearch = e => {
         e.preventDefault();
     
         if (inputData.searchInput.length > 0) {
-            if (dataChannel.current.readyState === 'open') {
-                dataChannel.current.send(JSON.stringify({
+            if (dataChannelForData.current.readyState === 'open') {
+                dataChannelForData.current.send(JSON.stringify({
                     resultOfSearch: inputData.searchInput,
                     sender: socket.id,
                     nickName: nickName,

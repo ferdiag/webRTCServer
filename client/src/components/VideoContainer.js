@@ -1,8 +1,10 @@
-import React, { useContext } from "react";
+import React, { useContext,useMemo } from "react";
 import { AppContext } from "../context/AppContext";
 
 const VideoContainer = () => {
-  // will only be shown if a videoconference has been started.
+  // This component will be shown if the isVideoConference is true.
+  // It handles the rendering and deleting of mediastreams.
+  //you have to use useMemo otherwise the stream gets rerendered.
   // parent: App.js
 
   const {
@@ -10,15 +12,20 @@ const VideoContainer = () => {
     arrayOfStreams,
     setArrayOfStreams,
     isVideoConference,
-    dataChannel,
+    dataChannelForData,
+    indexOfActiveRoom,
+    roomsRef
   } = useContext(AppContext);
 
   const handleDeleteStream = (e, index) => {
-    e.preventDefault();
+    // First, get the stream and stop it.
 
-    dataChannel.current.send(
+    e.preventDefault();
+   console.log(roomsRef[indexOfActiveRoom])
+   dataChannelForData.current.send(
       JSON.stringify({
         action: "delete",
+
       })
     );
 
@@ -28,37 +35,42 @@ const VideoContainer = () => {
     tracks.forEach((track) => {
       track.stop();
     });
-    
+
     const streamId = arrayOfStreams[index].id;
     const updateArray = arrayOfStreams.filter(
       (stream) => stream.id != streamId
     );
-    if (arrayOfStreams[index].peer) {
-      arrayOfStreams[index].peer.close();
+    if (arrayOfStreams[index].peer === "externalStream") {
       console.log(arrayOfStreams[index].peer);
+      //If there is a peer, the peer conenction will be closed.
+      // This is important, because you dont want to close the local peer connection.
+      arrayOfStreams[index].peer.close();
     }
     setArrayOfStreams(updateArray);
   };
 
-  const showArrayOfStreams = arrayOfStreams.map((streamObject, index) => {
-    console.log(arrayOfStreams)
-    return streamObject.stream.id ? (
-      <div key={index}>
-        <video
-          autoPlay
-          ref={(video) => {
-            if (video) video.srcObject = streamObject.stream;
-          }}
-          style={{
-            height: "400px",
-            width: "400px",
-            border: "1px solid black",
-          }}
-        ></video>
-        <button onClick={(e) => handleDeleteStream(e, index)}>X</button>
-      </div>
-    ) : null;
-  });
+  const showArrayOfStreams = useMemo(       //useMemo handles the rerendering of the component. Rerender occurs just after a change of arrayOfStreams.
+    () =>
+      arrayOfStreams.map((streamObject, index) => {
+        return streamObject.stream.id ? (
+          <div key={index}>
+            <video
+              autoPlay
+              ref={(video) => {
+                if (video) video.srcObject = streamObject.stream;
+              }}
+              style={{
+                height: "400px",
+                width: "400px",
+                border: "1px solid black",
+              }}
+            ></video>
+            <button onClick={(e) => handleDeleteStream(e, index)}>X</button>
+          </div>
+        ) : null;
+      }),
+    [arrayOfStreams]
+  );
 
   return (
     <div

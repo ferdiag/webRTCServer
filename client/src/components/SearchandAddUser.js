@@ -2,12 +2,12 @@ import React,{useState,useContext} from 'react'
 import { AppContext } from '../context/AppContext'
 
 import { handleChange } from '../lib/handleChange'
-import { socket } from '../socket'
+import { socket } from '../services'
 
 const SearchAndAddUserToAnExistingRoom = () => {
     //parent:Room.js
     
-    const { indexOfActiveRoom, roomsRef, dataChannel, nickName, email } = useContext(AppContext)
+    const { indexOfActiveRoom, roomsRef, dataChannelForData, nickName, email } = useContext(AppContext)
     const initValAddUser = { searchInput: "" }
     const [inputDataAdduser, setInputDataAddUser] = useState(initValAddUser)
    
@@ -15,8 +15,8 @@ const SearchAndAddUserToAnExistingRoom = () => {
         e.preventDefault();
 
         if (inputDataAdduser.searchInput.length > 0) {
-            if (dataChannel.current.readyState === 'open') {
-                dataChannel.current.send(JSON.stringify({
+            if (dataChannelForData.current.readyState === 'open') {
+                dataChannelForData.current.send(JSON.stringify({
                     resultOfSearch: inputDataAdduser.searchInput,
                     sender: socket.id,
                     nickName: nickName,
