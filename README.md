@@ -3,7 +3,7 @@
 
 ## Überblick
 
-Dieses Project soll potentiellen Arbeitgebern meine Fähigkeiten im Bereich Webentwicklung sowie der Erstellung von Node.js backends vernmitteln. Ich erstelle eine Videokonferenz-/Chat Applikation, die Peer-to-Peer Verbindungen für die Kommunikation zwischen den Usern nutzt. Diese werden nicht direkt miteinander kommunizieren, sondern über eine Selective Forward Unit (SFU), welche für das Management der Streams und Chatnachrichten verantwortlich ist. Die native Spracherkennung des Betriebssystems wird, falls gewünscht, das gesprochene Wort einer Videokonferenz aufzeichnen und ein entsprechendes Dokument wird zum Download für die Teilnehmer bereitgestellt. Für die Erstellung des Projekts nutze ich React, socket.io, webRTC, die Web Speech Api, Node.js, Bootstrap und CSS.
+Dieses Project soll potentiellen Arbeitgebern meine Fähigkeiten im Bereich Webentwicklung sowie der Erstellung von Node.js backends vernmitteln. Ich erstelle eine Videokonferenz-/Chat Applikation, die Peer-to-Peer Verbindungen für die Kommunikation zwischen den Usern nutzt. Diese werden nicht direkt miteinander kommunizieren, sondern über eine Selective Forward Unit (SFU), welche für das Management der Streams und Chatnachrichten verantwortlich ist. Die native Spracherkennung des Betriebssystems wird, falls gewünscht, das gesprochene Wort einer Videokonferenz aufzeichnen und ein entsprechendes Dokument wird für dnehmer zum Download bereitgestellt.
 
 ## Frameworks, APIS und libraries
 
@@ -15,11 +15,8 @@ Node.js
 Bootstrap
 Html
 CSS
+MongoDb
 
 ## Projektstatus
 
-Derzeit ist es Nutzern möglich Chaträume zu erstellen und andere Nutzer einzuladen diesen beizutreten. Darüber hinaus können User eine Videoübertragung starten und ihren Bildschirm teilen.
-Die Registrierung ist noch nicht implementiert. Für die Nutzung der Applikation stehen Ihnen Platzhalter im Backend zur Verfügung.
-
-## To-do-Liste
-- Fertigstellung der README.MD
+Derzeit ist es Nutzern möglich, Chaträume zu erstellen und andere Nutzer einzuladen diesen beizutreten. Darüber hinaus können Nutzer eine Videoübertragung starten und ihren Bildschirm teilen. Die Registrierung ist noch nicht implementiert. Für die Nutzung der Applikation stehen Platzhalter im Backend zur Verfügung.
