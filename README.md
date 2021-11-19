@@ -7,15 +7,15 @@ Dieses Project soll potentiellen Arbeitgebern meine Fähigkeiten im Bereich Webe
 
 ## Frameworks, APIS und libraries
 
-React
-Socket.io
-webRTC
-Web Speech Api
-Node.js
-Bootstrap
-Html
-CSS
-MongoDb
+- React
+- Socket.io
+- webRTC
+- Web Speech Api
+- Node.js
+- Bootstrap
+- Html
+- CSS
+- MongoDB
 
 ## Projektstatus
 
