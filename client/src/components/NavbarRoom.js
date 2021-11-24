@@ -1,7 +1,6 @@
 import React, { useState, useContext } from "react";
 import { AppContext } from "../context/AppContext";
-import createVideoElement from "../lib/createVideoElement";
-import { socket } from "../services";
+import InvitationAlarm from "./InvitationAlarm";
 
 const NavbarRoom = () => {
   //This component handles the behaviour of the videostream.
@@ -10,10 +9,12 @@ const NavbarRoom = () => {
   // parent: Chat.js.
 
   const {
+    isInvitationForReceivingAStream,
     localPeerForBroadcast,
     handleInitialVideostream,
     localPeerForDataChannel,
     nickName,
+    roomsRef,
     arrayOfStreams,
     localStreamRef,
     isVideoConference,
@@ -32,16 +33,20 @@ const NavbarRoom = () => {
       audio: false,
       video: true,
     };
-    navigator.mediaDevices.getDisplayMedia(constraints).then((stream) => {
-      return Promise.all(
-        localPeerForBroadcast.current.getSenders().map((sender) =>
-          sender.replaceTrack(
-            stream.getTracks().find((t) => t.kind == sender.track.kind),
-            stream
+    if (isVideoConference) {
+      navigator.mediaDevices.getDisplayMedia(constraints).then((stream) => {
+        return Promise.all(
+          localPeerForBroadcast.current.getSenders().map((sender) =>
+            sender.replaceTrack(
+              stream.getTracks().find((t) => t.kind == sender.track.kind),
+              stream
+            )
           )
-        )
-      );
-    });
+        );
+      });
+    } else {
+      console.log("leider gibt es keine Videoconference");
+    }
   }
 
   const handleShowVideoConference = (e) => {
@@ -50,24 +55,14 @@ const NavbarRoom = () => {
     // video conference started, you send an object to the backend.
 
     e.preventDefault();
-    setIsVideoConference(!isVideoConference);
+    setIsVideoConference(true);
 
-    // if (!localPeerForBroadcast) localPeerForBroadcast = {};
     handleInitialVideostream();
-
-    if (isVideoConference) {
-      const stream = localStreamRef.current;
-      const tracks = stream.getTracks();
-
-      tracks.forEach((track) => {
-        track.stop();
-      });
-      setIsVideoConference(false);
-    }
   };
 
   return (
     <div>
+      <InvitationAlarm />
       <div>{nickName}</div>
       <button onClick={(e) => handleShowVideoConference(e)}>
         {!isVideoConference

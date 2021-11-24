@@ -4,10 +4,13 @@ import { AppContext } from "../context/AppContext";
 const VideoContainer = () => {
   // This component will be shown if the isVideoConference is true.
   // It handles the rendering and deleting of mediastreams.
-  //you have to use useMemo otherwise the stream gets rerendered.
+  // useMemo is required because otherwise the stream gets rerendered.
   // parent: App.js
 
   const {
+    localPeerForBroadcast,
+    forceUpdate,
+    email,
     videoContainerRef,
     arrayOfStreams,
     setArrayOfStreams,
@@ -15,17 +18,12 @@ const VideoContainer = () => {
     dataChannelForData,
     indexOfActiveRoom,
     roomsRef,
+    setIsVideoConference,
   } = useContext(AppContext);
 
   const handleDeleteStream = (e, index) => {
     // First, get the stream and stop it.
-
     e.preventDefault();
-    dataChannelForData.current.send(
-      JSON.stringify({
-        action: "delete",
-      })
-    );
 
     const stream = arrayOfStreams[index].stream;
     const tracks = stream.getTracks();
@@ -34,40 +32,73 @@ const VideoContainer = () => {
       track.stop();
     });
 
-    const streamId = arrayOfStreams[index].id;
+    const streamId = arrayOfStreams[index].stream.id;
+   
+     arrayOfStreams.map(stream=>console.log(stream.stream,streamId))
     const updateArray = arrayOfStreams.filter(
-      (stream) => stream.id != streamId
+      (streamObject) => streamObject.stream.id != streamId
     );
-    if (arrayOfStreams[index].peer === "externalStream") {
-      //If there is a peer, the peer conenction will be closed.
-      // This is important, because you dont want to close the local peer connection.
-      arrayOfStreams[index].peer.close();
+    
+
+    if (arrayOfStreams[index].peer === "localStream") {
+      dataChannelForData.current.send(
+        JSON.stringify({
+          action: "delete",
+          roomId: roomsRef.current[indexOfActiveRoom].roomId,
+          emailOfCreator: roomsRef.current[indexOfActiveRoom].emailOfCreator,
+          streamId: arrayOfStreams[index].stream.id,
+          email,
+        })
+      );
+      localPeerForBroadcast.current.close();
+      localPeerForBroadcast.current = {};
     }
+    if (arrayOfStreams[index].peer === "externalStream") {
+      arrayOfStreams[index].peer.close();
+      arrayOfStreams[index].peer = null;
+    }
+    console.log(streamId, updateArray);
     setArrayOfStreams(updateArray);
+  
+    setIsVideoConference(false);
+    forceUpdate()
   };
 
   const showArrayOfStreams = useMemo(
-    //useMemo handles the rerendering of the component. Rerender occurs just after a change of arrayOfStreams.
     () =>
       arrayOfStreams.map((streamObject, index) => {
         return streamObject.stream.id ? (
-          <div key={index}>
+          <div
+            style={{
+              display: "flex",
+              background: "green",
+              flexDirection: "row",
+              height: "400px",
+              width: "350px",
+              border: "1px solid black",
+            }}
+            key={index}
+          >
             <video
+              style={{
+                height: "400px",
+                width: "300px",
+              }}
               autoPlay
               ref={(video) => {
                 if (video) video.srcObject = streamObject.stream;
               }}
-              style={{
-                height: "400px",
-                width: "400px",
-                border: "1px solid black",
-              }}
             ></video>
-            <button onClick={(e) => handleDeleteStream(e, index)}>X</button>
+            <button
+              style={{ height: "50px", width: "50px" }}
+              onClick={(e) => handleDeleteStream(e, index)}
+            >
+              X
+            </button>
           </div>
         ) : null;
       }),
-    [arrayOfStreams]
+    [arrayOfStreams, handleDeleteStream]
   );
 
   return (
@@ -76,8 +107,10 @@ const VideoContainer = () => {
         !isVideoConference || arrayOfStreams.length === 0
           ? { display: "none" }
           : {
-              height: "500px",
-              width: "500px",
+              height: "300",
+              width: "210px",
+              display: "flex",
+              flexDirection: "row",
             }
       }
       ref={videoContainerRef}

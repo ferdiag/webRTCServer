@@ -11,9 +11,10 @@ function AppContextProvider({ children }) {
   const [email, setEmail] = useState("");
   const [ignored, forceUpdate] = useReducer((x) => x + 1, 0); // forces to rerender the component.
   const [indexOfActiveRoom, setIndexOfActiveRoom] = useState(0); //the index of the room which is currently shown.
-  const [arrayOfStreams, setArrayOfStreams] = useState([]);
+  const [arrayOfStreams, setArrayOfStreams] = useState([]);// includes streams and peers for receiving streams!!!.
   const [isVideoConference, setIsVideoConference] = useState(false); //toggles if there is a videoconference
-
+  const [isInvitationForReceivingAStream, setIsInvitationForReceivingAStream] = useState(false); //toggle for the InvitationAlarm component
+  // const [emailOfCreator,setEmailOfCreator]=useState({}) 
   const roomsRef = useRef(); //roomsRef is an Array with all the Users rooms.
   const videoContainerRef = useRef();
   const localStreamRef = useRef();
@@ -25,8 +26,8 @@ function AppContextProvider({ children }) {
   const dataChannelForVideostream = useRef();
 
   const handleInitialConnection = async (dataOfLogin) => {
-    //This component creates the peer connection.
-    // The Reference dataChannel.current is waiting until the readyState is open, then it will execute the socke.emit to send the data to the backend.
+    //This function is responsible for creating the peer connection during login.
+    // the login data will be send to the backend after the dataChannelForLogin state is ready.
 
     // args:
     // @dataOfLogin:(object): This object has the two values from the login comnponent (email and password)
@@ -54,8 +55,13 @@ function AppContextProvider({ children }) {
   };
 
   const handleInitialVideostream = async () => {
+    // This function takes the getUserMedia method from the navigator.mediaDevices object to get access
+    //  to the camera and adds the result to the Peer connection. To inform the members of the room that a
+    // video conference started, you send an object to the backend.
     const action = "createVideoConnection";
-    const peer = await createPeer(action);
+    const peer = await createPeer(action, {
+      emailOfCreator: roomsRef.current[indexOfActiveRoom].emailOfCreator,
+    });
 
     dataChannelForVideostream.current = peer.createDataChannel(`datastream`);
 
@@ -65,25 +71,27 @@ function AppContextProvider({ children }) {
     };
 
     navigator.mediaDevices.getUserMedia(constraints).then((localStream) => {
-      if (!isVideoConference) {
-        localStream
-          .getTracks()
-          .forEach((track) =>
-            localPeerForBroadcast.current.addTrack(track, localStream)
-          );
-        dataChannelForData.current.send(
-          JSON.stringify({
-            streamId: localStream.id,
-            sender: socket.id,
-            nickName: nickName,
-            roomId: roomsRef.current[indexOfActiveRoom].roomId,
-            emailOfCreator: roomsRef.current[indexOfActiveRoom].emailOfCreator,
-            emailOfSender: email,
-            action: "startVideoConference",
-          })
+      localStream
+        .getTracks()
+        .forEach((track) =>
+          localPeerForBroadcast.current.addTrack(track, localStream)
         );
-        setArrayOfStreams([...arrayOfStreams, { stream: localStream }]);
-      }
+      dataChannelForData.current.send(
+        JSON.stringify({
+          streamId: localStream.id,
+          sender: socket.id,
+          nickName: nickName,
+          roomId: roomsRef.current[indexOfActiveRoom].roomId,
+          emailOfCreator: roomsRef.current[indexOfActiveRoom].emailOfCreator,
+          emailOfSender: email,
+          action: "startVideoConference",
+        })
+      );
+      setArrayOfStreams([
+        ...arrayOfStreams,
+        { stream: localStream, role: "localStream" },
+      ]);
+
       localStreamRef.current = localStream;
       localPeerForBroadcast.current = peer;
     });
@@ -150,7 +158,8 @@ function AppContextProvider({ children }) {
 
         const indexOfTargetStreamObject =
           copyOfCurrrentArrayOfStreams.findIndex(
-            (streamObject) => streamObject.peer.id === e.currentTarget.id
+            (streamObject) =>
+              streamObject.peer && streamObject.peer.id === e.currentTarget.id
           );
 
         copyOfCurrrentArrayOfStreams[indexOfTargetStreamObject] = {
@@ -183,7 +192,7 @@ function AppContextProvider({ children }) {
       email,
       action: target,
       peerID: peer.id,
-      emailOfCreator: targetData && targetData.emailOfCreator,
+      emailOfCreator:roomsRef.current && roomsRef.current[indexOfActiveRoom].emailOfCreator 
     };
 
     socket.emit(`${target}`, payload, (data) => {
@@ -203,21 +212,22 @@ function AppContextProvider({ children }) {
     });
   }
 
-  useEffect(() => {
-    //This useEffect is waiting for incoming data to create a peerconnection for receiving a stream.
-
+ 
+   
+   const handleConfirmVideoConference= async()=>{
+      //This function is waiting for incoming data to create a peerconnection for receiving a stream.
+      //get executed in the VideoContainer component
+      
     // args:
     //@addTransceiver(function): adds a tunnel for receiving and sending streams through the webrtc connection.
     //@data (object): just for transport and to identyfy the broadcaster on server side. This object contains the key value pair of emailOfCreator and IdOfTargetRoom.
 
-    socket.on("invitationforReceivingAStream", async (data) => {
-      const action = "createPeerForReceivingStreams";
-      const peer = await createPeer(action, data);
-
+     const action = "createPeerForReceivingStreams";
+      const peer = await createPeer(action);
+      console.log(peer);
       peer.addTransceiver("video", { direction: "recvonly" });
-    });
-  }, [setArrayOfStreams, arrayOfStreams]);
-
+   }
+      
   useEffect(() => {
     // This socket gets the answer from the handlenegotionationneeded function (action=createReceivingStreams).
     // set the peer remoteDescription for establishing the webRtc connection.
@@ -226,9 +236,9 @@ function AppContextProvider({ children }) {
     // @data (object): Includes the peerID to identy the correct peer at the arrayOfStreams.
 
     socket.on("answerCreatePeerForReceivingStreams", (data) => {
-      console.log("got answer", data);
       const indexOfTargetStream = arrayOfStreams.findIndex(
-        (streamObject) => streamObject.peer.id === data.peerID
+        (streamObject) =>
+          streamObject.peer && streamObject.peer.id === data.peerID
       );
 
       if (indexOfTargetStream >= 0) {
@@ -250,6 +260,11 @@ function AppContextProvider({ children }) {
       //@e.data(object): The keys of this object can differ but the data.action gives the information which if-statement will be exectuted.
       const data = JSON.parse(e.data);
 
+      if (data.action === "invitationForReceivingAStream") {
+        console.log("get request")
+        setIsInvitationForReceivingAStream(true);
+        // setEmailOfCreator(()=>{return data.emailOfCreator})
+      }
       if (data.action === "login") {
         setIsLoggedIn(true);
         setNickname(data.srcUser.nickName);
@@ -299,13 +314,13 @@ function AppContextProvider({ children }) {
         }
       }
       if (data.action === "searchUser") {
-        if (data.result != "error") {
+        if (data.result !== "error") {
           let rawName = "";
           for (let i = 0; i < data.members.length; i++) {
             //creating the name of the room.
             const memberNickName = data.members[i].nickName.toString();
 
-            if (nickName != memberNickName) {
+            if (nickName !== memberNickName) {
               rawName = rawName.concat(" ", memberNickName);
             }
           }
@@ -344,6 +359,18 @@ function AppContextProvider({ children }) {
         ];
         forceUpdate();
       }
+      if (data.action === "delete") {
+        setArrayOfStreams((currentArrayOfStreams) => {
+          const resStreamObject = currentArrayOfStreams.find(
+            (streamObject) => streamObject.stream.id === data.streamId
+          );
+          resStreamObject.peer.close();
+          const updatedArrayOfStreams = currentArrayOfStreams.filter(
+            (streamObject) => streamObject.stream.id !== data.streamId
+          );
+          return updatedArrayOfStreams;
+        });
+      }
     };
   };
 
@@ -374,6 +401,10 @@ function AppContextProvider({ children }) {
         handleInitialConnection,
         localStreamRef,
         videoContainerRef,
+        setIsInvitationForReceivingAStream,
+        isInvitationForReceivingAStream,
+        handleConfirmVideoConference,
+        // emailOfCreator
       }}
     >
       {children}

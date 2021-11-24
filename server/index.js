@@ -26,7 +26,10 @@ const createPeer = (data) => {
       },
     ],
   });
+ 
   peer.socketOfSender = data.socketOfSender; // to identify the broadcaster in the ontrack method
+  peer.email=data.email
+  peer.emailOfCreator=data.emailOfCreator
 
   return peer;
 };
@@ -44,11 +47,9 @@ io.on("connection", (socket) => {
       // then you assign the stream to the stream key of the creator.
       // The next step is to identy the room of the video conference
       // and send all Users of the room the order to create a new WebRtc Channel for consuming mediaStreams.
-
-      console.log("track received");
-      const socketString = peer.socketOfSender.toString();
+      console.log(peer)
       const indexOfCreator = Users.findIndex(
-        (user) => user.socket === socketString
+        (user) => user.email === peer.emailOfCreator
       );
 
       if (indexOfCreator >= 0) {
@@ -56,22 +57,34 @@ io.on("connection", (socket) => {
 
         const targetRoom = Users[indexOfCreator].createdRooms.find(
           (room) => room.isVideoConference === true
-        );
-
-        if (targetRoom) {
+          );
+          
+         if(targetRoom) {
           const filteredTargetRoom = targetRoom.members.filter(
             (member) =>
-              member.email != Users[indexOfCreator].email &&
+              member.email != peer.email &&
               member.isLoggedIn === true
           );
-
+          console.log(targetRoom)
+          // const membersWithoutScrUser = Users[indexOfCreator].createdRooms[     
+          //   indexOfRoom
+          // ].members.filter((member) => member.email != data.email);
+          const payload = {
+            action:"invitationForReceivingAStream",
+            emailOfCreator:peer.emailOfCreator,
+          }
           filteredTargetRoom.forEach((member) => {
-            io.to(`${member.socket}`).emit("invitationforReceivingAStream", {
-              emailOfCreator: Users[indexOfCreator].email,
-              IdOfTargetRoom: targetRoom.roomId,
-              peerID: data.peerID,
-            });
+            if (member.isLoggedIn && member.email != data.email) {
+              member.dataChannel.send(JSON.stringify(payload));
+            }
           });
+          // filteredTargetRoom.forEach((member) => {
+          //   io.to(`${member.socket}`).emit("invitationforReceivingAStream", {
+          //     emailOfCreator: Users[indexOfCreator].email,
+          //     IdOfTargetRoom: targetRoom.roomId,
+          //     peerID: data.peerID,
+          //   });
+          // });
         } else {
           console.log("es gibt keine Videokonferenz");
         }
@@ -189,8 +202,7 @@ io.on("connection", (socket) => {
     );
 
     Users[indexOfCreator].stream.getTracks().forEach((track) => {
-      //adding the stream to the peer
-      peer.addTrack(track, Users[indexOfCreator].stream);
+      peer.addTrack(track, Users[indexOfCreator].stream);  //adding the stream to the peer
     });
 
     const answer = await peer.createAnswer();
