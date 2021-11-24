@@ -34,7 +34,7 @@ const VideoContainer = () => {
 
     const streamId = arrayOfStreams[index].stream.id;
    
-     arrayOfStreams.map(stream=>console.log(stream.stream,streamId))
+    
     const updateArray = arrayOfStreams.filter(
       (streamObject) => streamObject.stream.id != streamId
     );
